@@ -1,0 +1,187 @@
+export enum SubscriberType {
+  BANK = 'BANK',
+  SUPERMARKET = 'SUPERMARKET',
+  FINANCIAL_INSTITUTION = 'FINANCIAL_INSTITUTION',
+  ENTERPRISE = 'ENTERPRISE',
+}
+
+export enum SubscriptionTier {
+  BASIC = 'BASIC',
+  PREMIUM = 'PREMIUM',
+  ENTERPRISE = 'ENTERPRISE',
+}
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  ANALYST = 'ANALYST',
+  REVIEWER = 'REVIEWER',
+  AUDITOR = 'AUDITOR',
+}
+
+export enum EntityType {
+  INDIVIDUAL = 'INDIVIDUAL',
+  ORGANIZATION = 'ORGANIZATION',
+}
+
+export enum EntityStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  PENDING = 'PENDING',
+  BLOCKED = 'BLOCKED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+export enum RiskLevel {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
+export enum ScreeningStatus {
+  CLEAR = 'CLEAR',
+  MATCH = 'MATCH',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+  PREFER_NOT_TO_SAY = 'PREFER_NOT_TO_SAY',
+}
+
+export enum IDType {
+  PASSPORT = 'PASSPORT',
+  NATIONAL_ID = 'NATIONAL_ID',
+  DRIVERS_LICENSE = 'DRIVERS_LICENSE',
+}
+
+export enum OrganizationType {
+  CORPORATION = 'CORPORATION',
+  LLC = 'LLC',
+  PARTNERSHIP = 'PARTNERSHIP',
+  NGO = 'NGO',
+  TRUST = 'TRUST',
+  FOUNDATION = 'FOUNDATION',
+}
+
+export enum ChangeType {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  STATUS_CHANGE = 'STATUS_CHANGE',
+}
+
+export enum FieldType {
+  TEXT = 'TEXT',
+  NUMBER = 'NUMBER',
+  DATE = 'DATE',
+  BOOLEAN = 'BOOLEAN',
+  JSON = 'JSON',
+  URL = 'URL',
+  EMAIL = 'EMAIL',
+}
+
+export enum IndividualRelationshipType {
+  SPOUSE = 'SPOUSE',
+  CHILD = 'CHILD',
+  PARENT = 'PARENT',
+  SIBLING = 'SIBLING',
+  RELATIVE = 'RELATIVE',
+  BUSINESS_PARTNER = 'BUSINESS_PARTNER',
+  ASSOCIATE = 'ASSOCIATE',
+  GUARDIAN = 'GUARDIAN',
+  BENEFICIARY = 'BENEFICIARY',
+}
+
+export enum OrganizationRelationshipType {
+  PARENT = 'PARENT',
+  SUBSIDIARY = 'SUBSIDIARY',
+  AFFILIATE = 'AFFILIATE',
+  JOINT_VENTURE = 'JOINT_VENTURE',
+  BRANCH = 'BRANCH',
+  SISTER_COMPANY = 'SISTER_COMPANY',
+  PARTNER = 'PARTNER',
+}
+
+export enum OwnershipType {
+  DIRECT = 'DIRECT',
+  INDIRECT = 'INDIRECT',
+  BENEFICIAL = 'BENEFICIAL',
+}
+
+export enum DocumentStatus {
+  NEW = 'NEW',
+  VALID = 'VALID',
+  ABOUT_TO_EXPIRE = 'ABOUT_TO_EXPIRE',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+}
+
+export enum AnalysisStatus {
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+}
+
+export enum ScreeningResult {
+  CLEAR = 'CLEAR',
+  POTENTIAL_MATCH = 'POTENTIAL_MATCH',
+  CONFIRMED_MATCH = 'CONFIRMED_MATCH',
+  FALSE_POSITIVE = 'FALSE_POSITIVE',
+}
+
+export enum ReviewDecision {
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  ESCALATED = 'ESCALATED',
+  FALSE_POSITIVE = 'FALSE_POSITIVE',
+  ACCEPTED = 'ACCEPTED',
+  OVERRIDDEN = 'OVERRIDDEN',
+}
+
+export enum ConfigValueType {
+  NUMBER = 'NUMBER',
+  BOOLEAN = 'BOOLEAN',
+  STRING = 'STRING',
+  JSON_ARRAY = 'JSON_ARRAY',
+}
+
+export enum ListScope {
+  SUBSCRIBER_SPECIFIC = 'SUBSCRIBER_SPECIFIC',
+  SYSTEM_WIDE = 'SYSTEM_WIDE',
+}
+
+export enum LogActionType {
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+  CREATE_ENTITY = 'CREATE_ENTITY',
+  UPDATE_ENTITY = 'UPDATE_ENTITY',
+  DELETE_ENTITY = 'DELETE_ENTITY',
+  SCREEN = 'SCREEN',
+  RISK_ASSESS = 'RISK_ASSESS',
+  UPLOAD_DOCUMENT = 'UPLOAD_DOCUMENT',
+  APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
+  CONFIGURE = 'CONFIGURE',
+  EXPORT = 'EXPORT',
+  IMPORT = 'IMPORT',
+}
+
+export enum LogStatus {
+  SUCCESS = 'SUCCESS',
+  FAILURE = 'FAILURE',
+  PARTIAL = 'PARTIAL',
+  ERROR = 'ERROR',
+}
+
+export enum LogSeverity {
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+  CRITICAL = 'CRITICAL',
+}

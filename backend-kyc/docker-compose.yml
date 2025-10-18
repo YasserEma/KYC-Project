@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kyc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: kyc_kyb_system
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./.docker/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d kyc_kyb_system']
+      interval: 5s
+      timeout: 5s
+      retries: 10
