@@ -105,14 +105,15 @@ export class DocumentRepository {
     filters: DocumentFilter = {},
     pagination: PaginationOptions = {},
   ): Promise<PaginationResult<DocumentEntity>> {
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + daysAhead);
-
     const queryBuilder = this.createFilteredQuery(filters);
-    queryBuilder.andWhere('documents.expiry_date BETWEEN :currentDate AND :expiryDate', {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + daysAhead);
+    
+    queryBuilder.andWhere('documents.expiry_date BETWEEN :currentDate AND :futureDate', {
       currentDate: new Date(),
-      expiryDate,
+      futureDate,
     });
+    
     return QueryHelper.buildPaginationResult(queryBuilder, pagination);
   }
 
@@ -128,8 +129,7 @@ export class DocumentRepository {
     pagination: PaginationOptions = {},
   ): Promise<PaginationResult<DocumentEntity>> {
     const queryBuilder = this.createFilteredQuery(filters);
-    queryBuilder.andWhere('documents.is_sensitive = :isSensitive', { isSensitive: true });
-    queryBuilder.andWhere('documents.is_encrypted = :isEncrypted', { isEncrypted: false });
+    queryBuilder.andWhere('documents.is_sensitive = true AND documents.is_encrypted = false');
     return QueryHelper.buildPaginationResult(queryBuilder, pagination);
   }
 
@@ -170,10 +170,14 @@ export class DocumentRepository {
     const queryBuilder = this.createFilteredQuery(filters);
     
     if (matchAll) {
+      // All tags must be present
       tags.forEach((tag, index) => {
-        queryBuilder.andWhere(`documents.tags ILIKE :tag${index}`, { [`tag${index}`]: `%${tag}%` });
+        queryBuilder.andWhere(`documents.tags ILIKE :tag${index}`, {
+          [`tag${index}`]: `%${tag}%`,
+        });
       });
     } else {
+      // Any tag can be present
       const tagConditions = tags.map((_, index) => `documents.tags ILIKE :tag${index}`).join(' OR ');
       const tagParams = tags.reduce((params, tag, index) => {
         params[`tag${index}`] = `%${tag}%`;
@@ -417,34 +421,12 @@ export class DocumentRepository {
       queryBuilder.andWhere('documents.is_active = :isActive', { isActive: filters.is_active });
     }
 
-    if (filters.is_expired !== undefined) {
-      if (filters.is_expired) {
-        queryBuilder.andWhere('documents.expiry_date < :currentDate', { currentDate: new Date() });
-      } else {
-        queryBuilder.andWhere('(documents.expiry_date IS NULL OR documents.expiry_date >= :currentDate)', { currentDate: new Date() });
-      }
-    }
-
-    if (filters.is_expiring_soon !== undefined) {
-      const thirtyDaysFromNow = new Date();
-      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-      
-      if (filters.is_expiring_soon) {
-        queryBuilder.andWhere('documents.expiry_date BETWEEN :currentDate AND :expiryDate', {
-          currentDate: new Date(),
-          expiryDate: thirtyDaysFromNow,
-        });
-      } else {
-        queryBuilder.andWhere('(documents.expiry_date IS NULL OR documents.expiry_date > :expiryDate)', { expiryDate: thirtyDaysFromNow });
-      }
-    }
-
     if (filters.issuing_country) {
       queryBuilder.andWhere('documents.issuing_country = :issuingCountry', { issuingCountry: filters.issuing_country });
     }
 
     if (filters.issuing_authority) {
-      queryBuilder.andWhere('documents.issuing_authority ILIKE :issuingAuthority', { issuingAuthority: `%${filters.issuing_authority}%` });
+      queryBuilder.andWhere('documents.issuing_authority = :issuingAuthority', { issuingAuthority: filters.issuing_authority });
     }
 
     if (filters.uploaded_by) {
@@ -479,7 +461,6 @@ export class DocumentRepository {
       queryBuilder.andWhere('documents.confidence_score <= :maxConfidenceScore', { maxConfidenceScore: filters.max_confidence_score });
     }
 
-    // Date range filters
     if (filters.issue_date_from) {
       queryBuilder.andWhere('documents.issue_date >= :issueDateFrom', { issueDateFrom: filters.issue_date_from });
     }
@@ -513,14 +494,16 @@ export class DocumentRepository {
     }
 
     if (filters.tags) {
-      const tags = Array.isArray(filters.tags) ? filters.tags : [filters.tags];
-      const tagConditions = tags.map((_, index) => `documents.tags ILIKE :tag${index}`).join(' OR ');
-      const tagParams = tags.reduce((params, tag, index) => {
-        params[`tag${index}`] = `%${tag}%`;
-        return params;
-      }, {});
-      
-      queryBuilder.andWhere(`(${tagConditions})`, tagParams);
+      if (Array.isArray(filters.tags)) {
+        const tagConditions = filters.tags.map((_, index) => `documents.tags ILIKE :tag${index}`).join(' OR ');
+        const tagParams = filters.tags.reduce((params, tag, index) => {
+          params[`tag${index}`] = `%${tag}%`;
+          return params;
+        }, {});
+        queryBuilder.andWhere(`(${tagConditions})`, tagParams);
+      } else {
+        queryBuilder.andWhere('documents.tags ILIKE :tags', { tags: `%${filters.tags}%` });
+      }
     }
 
     if (filters.has_extracted_data !== undefined) {
@@ -555,6 +538,30 @@ export class DocumentRepository {
       queryBuilder.andWhere('documents.retention_policy = :retentionPolicy', { retentionPolicy: filters.retention_policy });
     }
 
+    if (filters.is_expired !== undefined) {
+      if (filters.is_expired) {
+        queryBuilder.andWhere('documents.expiry_date < :currentDate', { currentDate: new Date() });
+      } else {
+        queryBuilder.andWhere('(documents.expiry_date IS NULL OR documents.expiry_date >= :currentDate)', { currentDate: new Date() });
+      }
+    }
+
+    if (filters.is_expiring_soon !== undefined) {
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      
+      if (filters.is_expiring_soon) {
+        queryBuilder.andWhere('documents.expiry_date BETWEEN :currentDate AND :futureDate', {
+          currentDate: new Date(),
+          futureDate: thirtyDaysFromNow,
+        });
+      } else {
+        queryBuilder.andWhere('(documents.expiry_date IS NULL OR documents.expiry_date > :futureDate)', {
+          futureDate: thirtyDaysFromNow,
+        });
+      }
+    }
+
     return queryBuilder;
   }
 
@@ -563,10 +570,10 @@ export class DocumentRepository {
     queryBuilder.select(`documents.${field}`, 'field_value');
     queryBuilder.addSelect('COUNT(*)', 'count');
     queryBuilder.groupBy(`documents.${field}`);
-
+    
     const results = await queryBuilder.getRawMany();
     return results.reduce((acc, result) => {
-      acc[result.field_value] = parseInt(result.count);
+      acc[result.field_value] = parseInt(result.count, 10);
       return acc;
     }, {});
   }
@@ -583,14 +590,15 @@ export class DocumentRepository {
   }
 
   private async getExpiringSoonCount(daysAhead: number, filters: DocumentFilter): Promise<number> {
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + daysAhead);
-
     const queryBuilder = this.createFilteredQuery(filters);
-    queryBuilder.andWhere('documents.expiry_date BETWEEN :currentDate AND :expiryDate', {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + daysAhead);
+    
+    queryBuilder.andWhere('documents.expiry_date BETWEEN :currentDate AND :futureDate', {
       currentDate: new Date(),
-      expiryDate,
+      futureDate,
     });
+    
     return queryBuilder.getCount();
   }
 
@@ -605,7 +613,7 @@ export class DocumentRepository {
     queryBuilder.select('SUM(documents.file_size)', 'total_size');
     
     const result = await queryBuilder.getRawOne();
-    return parseInt(result.total_size) || 0;
+    return parseInt(result?.total_size || '0', 10);
   }
 
   private async getAverageConfidenceScore(filters: DocumentFilter): Promise<number> {
@@ -614,6 +622,6 @@ export class DocumentRepository {
     queryBuilder.andWhere('documents.confidence_score IS NOT NULL');
     
     const result = await queryBuilder.getRawOne();
-    return parseFloat(result.avg_confidence) || 0;
+    return parseFloat(result?.avg_confidence || '0');
   }
 }
